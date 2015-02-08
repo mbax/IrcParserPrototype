@@ -134,7 +134,7 @@ public class ParserTester {
         } else {
             // No matches? We treat it as a request to back to the normal/default colour
             System.out.println("It's a reset!");
-            return new ColourMessageComponent(null, null);
+            return new ColourResetMessageComponent();
         }
 
     }
