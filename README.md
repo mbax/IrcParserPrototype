@@ -6,4 +6,4 @@ Output:
 
 ````html
 <span class="default-color"><span class="bold">Bold test! <span class="color-4-5">Colourful text <span class="color-5-4">with reverse</span></span></span></span>
-``
+
