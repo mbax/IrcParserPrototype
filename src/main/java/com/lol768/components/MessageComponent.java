@@ -5,6 +5,6 @@ public abstract class MessageComponent {
     public abstract String getCssClass();
 
    public String toString() {
-       return "My CSS class is " + this.getCssClass();
+       return "My CSS class is \"" + this.getCssClass() + "\"";
    }
 }

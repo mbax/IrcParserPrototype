@@ -10,7 +10,7 @@ public class TextMessageComponent extends MessageComponent {
 
     @Override
     public String getCssClass() {
-        return "normal-text";
+        return "";
     }
 
     @Override

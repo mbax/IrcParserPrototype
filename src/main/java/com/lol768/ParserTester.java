@@ -15,12 +15,17 @@ public class ParserTester {
 
     private String msg;
 
-    private TreeNode<MessageComponent> root = new TreeNode<>(new TextMessageComponent(""));
+    private TreeNode<MessageComponent> root = new TreeNode<>(new ColourResetMessageComponent());
     private TreeNode<MessageComponent> lastAdded = root;
+
+    private int shouldSkip = 1;
 
     public ParserTester(String msg) {
         this.msg = msg;
         processMessage(msg);
+        for (TreeNode<MessageComponent> tn : this.root) {
+            System.out.println("I'm on level " + tn.getLevel() + ". " + tn.data);
+        }
     }
 
     public static void main(String[] args) {
@@ -29,6 +34,8 @@ public class ParserTester {
     }
 
     private void processMessage(String fragment) {
+        System.out.println("Got fragment: " + fragment);
+        boolean done = false;
         out:
         for (int i = 0; i < fragment.length(); i++) {
             char currentChar = fragment.charAt(i);
@@ -37,15 +44,21 @@ public class ParserTester {
                 if (currentChar == item.getChar()) {
                     System.out.println("Got special character " + (int) currentChar);
                     addToTree(currentChar, fragment, i);
-                    processMessage(fragment.substring(i+1));
+                    processMessage(fragment.substring(i+shouldSkip));
+                    done = true;
                     break out;
                 }
             }
+        }
+        if (!done) {
+            lastAdded.addChild(new TextMessageComponent(fragment));
         }
         System.out.println("Quit!");
     }
 
     private void addToTree(char c, String fragment, int index) {
+
+        shouldSkip = 1;
 
         if (index != 0) {
             lastAdded.addChild(new TextMessageComponent(fragment.substring(0,index)));
@@ -61,7 +74,15 @@ public class ParserTester {
         }
 
         if (c == FormatChars.REVERSE.getChar()) {
-            mc = new ReverseMessageComponent();
+            TreeNode<MessageComponent> parent = new TreeNode<MessageComponent>(null);
+            parent.parent = lastAdded;
+            mc = new ColourMessageComponent(null, null);
+
+            while ((parent = parent.parent) != null) {
+                if (parent.data instanceof ColourMessageComponent) {
+                    mc = ((ColourMessageComponent)parent.data).getInverse();
+                }
+            }
         }
 
         if (c == FormatChars.COLOR.getChar()) {
@@ -69,9 +90,7 @@ public class ParserTester {
         }
 
         if (mc == null) {
-            for (TreeNode<MessageComponent> tn : this.root) {
-                System.out.println("I'm on level " + tn.getLevel() + ". " + tn.data);
-            }
+
             throw new NotImplementedException();
         }
         this.lastAdded = this.lastAdded.addChild(mc);
@@ -79,14 +98,32 @@ public class ParserTester {
     }
 
     private MessageComponent parseColour(String fragment, int index) {
-        String regex = "([0-9][0-9]?)(?:,[0-9][0-9]?)?"; // mIRC accepts 0 => 99 and ignores invalid colours
+        String regex = "([0-9][0-9]?)(?:,([0-9][0-9]?))?"; // mIRC accepts 0 => 99 and ignores invalid colours
 
         // Get 5 characters following the colour character (xx,yy)
         String toMatch = fragment.substring(index+1, index+6);
+        System.out.println(toMatch);
         Pattern pattern = Pattern.compile(regex);
+
+
         Matcher match = pattern.matcher(toMatch);
 
-        // No matches? We treat it as a request to back to the normal/default colour
-        return null;
+        if (match.find()) {
+            System.out.println("Matches!");
+            if (match.groupCount() == 1) {
+                System.out.println("It's a foreground!");
+                shouldSkip = 2;
+                return new ColourMessageComponent(Integer.parseInt(match.group(1)), null);
+            } else {
+                System.out.println("It's a foreground and background!");
+                shouldSkip = 4;
+                return new ColourMessageComponent(Integer.parseInt(match.group(1)), Integer.parseInt(match.group(2)));
+            }
+        } else {
+            // No matches? We treat it as a request to back to the normal/default colour
+            System.out.println("It's a reset!");
+            return new ColourResetMessageComponent();
+        }
+
     }
 }
