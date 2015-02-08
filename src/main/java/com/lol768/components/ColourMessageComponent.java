@@ -7,7 +7,7 @@ public class ColourMessageComponent extends MessageComponent {
 
     @Override
     public String getCssClass() {
-        return "color";
+        return "color-" + foreground + "-" + background;
     }
 
     public ColourMessageComponent(Integer foreground, Integer background) {

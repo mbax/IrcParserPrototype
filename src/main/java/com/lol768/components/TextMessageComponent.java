@@ -17,4 +17,8 @@ public class TextMessageComponent extends MessageComponent {
     public String toString() {
         return super.toString() + " and my text is \"" + text + "\"";
     }
+
+    public String getText() {
+        return text;
+    }
 }

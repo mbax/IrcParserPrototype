@@ -23,8 +23,23 @@ public class ParserTester {
     public ParserTester(String msg) {
         this.msg = msg;
         processMessage(msg);
+        int spansToClose = 0;
         for (TreeNode<MessageComponent> tn : this.root) {
-            System.out.println("I'm on level " + tn.getLevel() + ". " + tn.data);
+            if (!tn.data.getCssClass().equals("")) {
+                System.out.print("<span class=\"" + tn.data.getCssClass() + "\">");
+                spansToClose++;
+
+            } else {
+                //System.out.print("<span>");
+            }
+
+            if (tn.data instanceof TextMessageComponent) {
+                System.out.print(((TextMessageComponent)tn.data).getText());
+            }
+        }
+
+        for (int i = spansToClose; i > 0; i--)  {
+            System.out.print("</span>");
         }
     }
 
@@ -39,7 +54,6 @@ public class ParserTester {
         out:
         for (int i = 0; i < fragment.length(); i++) {
             char currentChar = fragment.charAt(i);
-            System.out.println(currentChar);
             for (FormatChars item : FormatChars.values()) {
                 if (currentChar == item.getChar()) {
                     System.out.println("Got special character " + (int) currentChar);
@@ -53,7 +67,6 @@ public class ParserTester {
         if (!done) {
             lastAdded.addChild(new TextMessageComponent(fragment));
         }
-        System.out.println("Quit!");
     }
 
     private void addToTree(char c, String fragment, int index) {
@@ -102,14 +115,13 @@ public class ParserTester {
 
         // Get 5 characters following the colour character (xx,yy)
         String toMatch = fragment.substring(index+1, index+6);
-        System.out.println(toMatch);
+        System.out.println("Inspecting " + toMatch);
         Pattern pattern = Pattern.compile(regex);
 
 
         Matcher match = pattern.matcher(toMatch);
 
         if (match.find()) {
-            System.out.println("Matches!");
             if (match.groupCount() == 1) {
                 System.out.println("It's a foreground!");
                 shouldSkip = 2;
