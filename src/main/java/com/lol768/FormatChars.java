@@ -7,6 +7,7 @@ public enum FormatChars {
 
     COLOR('\u0003'),
     BOLD('\u0002'),
+    ITALIC('\u001d'),
     UNDERLINE('\u001f'),
     REVERSE('\u0016'),
     RESET('\u000f');
